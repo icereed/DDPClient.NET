@@ -27,5 +27,7 @@
         /// <returns>A handle</returns>
         int Subscribe(string subscribeTo, params string[] args);
         int GetCurrentRequestId();
+
+        IDdpStateTracker StateTracker { get; }
     }
 }

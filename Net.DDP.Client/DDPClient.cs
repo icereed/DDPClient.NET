@@ -106,5 +106,6 @@ namespace Net.DDP.Client
             return _uniqueId;
         }
 
+        public IDdpStateTracker StateTracker => _connector;
     }
 }

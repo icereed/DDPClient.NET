@@ -3,16 +3,21 @@ using WebSocket4Net;
 
 namespace Net.DDP.Client
 {
-    public interface IDdpConnector
+    public interface IDdpStateTracker
     {
         event EventHandler OnConnecting;
         event EventHandler OnOpen;
         event EventHandler<DdpConnectionError> OnError;
         event EventHandler OnClosed;
-        event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
 
         ConnectionState State { get; }
+    }
+
+    public interface IDdpConnector : IDdpStateTracker
+    {
+        event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
+
         void Close();
         void Connect(string url, bool useSsl = true);
         void Send(string message);
