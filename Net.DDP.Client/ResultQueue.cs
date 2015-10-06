@@ -11,7 +11,7 @@ namespace Net.DDP.Client
         private static ManualResetEvent _enqueuedEvent;
         private static Thread _workerThread;
         private Queue<string> _jsonItemsQueue;
-        private string _currentJsongItem;
+        private string _currentJsonItem;
         private JsonDeserializeHelper _serializeHelper;
 
         public ResultQueue(IDataSubscriber subscriber)
@@ -42,7 +42,7 @@ namespace Net.DDP.Client
                 if (_jsonItemsQueue.Count > 0)
                 {
                     _enqueuedEvent.Reset();
-                    _currentJsongItem = _jsonItemsQueue.Dequeue();
+                    _currentJsonItem = _jsonItemsQueue.Dequeue();
                 }
                 else
                 {
@@ -67,7 +67,7 @@ namespace Net.DDP.Client
         {
             while (Dequeue())
             {
-                _serializeHelper.Deserialize(_currentJsongItem);
+                _serializeHelper.Deserialize(_currentJsonItem);
             }
         }
     }

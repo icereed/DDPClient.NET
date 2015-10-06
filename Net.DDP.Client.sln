@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.DDP.Client", "Net.DDP.Client\Net.DDP.Client.csproj", "{2A0410D6-7916-4EFA-8653-A750D7C88047}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.DDP.Client.Test", "Net.DDP.Client.Test\Net.DDP.Client.Test.csproj", "{E9DE9D00-030A-467F-B2A3-A5FF9C00BC19}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.DDPClient", "NuGet.DDPClient\NuGet.DDPClient.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.DDP.Client.UnitTest", "Net.DDP.Client.UnitTest\Net.DDP.Client.UnitTest.csproj", "{770C769C-E04C-485B-9E8B-199A1B26C354}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,18 @@ Global
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|x86.ActiveCfg = Release|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Debug|x86.Build.0 = Debug|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Release|Any CPU.Build.0 = Release|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Release|x86.ActiveCfg = Release|Any CPU
+		{770C769C-E04C-485B-9E8B-199A1B26C354}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
