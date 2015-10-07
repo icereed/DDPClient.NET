@@ -68,10 +68,10 @@ namespace Net.DDP.Client
         /// <param name="subscribeTo">Name of the subscription. Matches the name of the server's publish() call.</param>
         /// <param name="args">Optional arguments passed to publisher function on server.</param>
         /// <returns>A handle</returns>
-        public int Subscribe(string subscribeTo, params string[] args)
+        public int Subscribe(string subscribeTo, params object[] args)
         {
             string message =
-                $"\"msg\": \"sub\",\"name\": \"{subscribeTo}\",\"params\": [{CreateJSonArray(args)}],\"id\": \"{NextId()}\"";
+                $"\"msg\": \"sub\",\"name\": \"{subscribeTo}\",\"params\": {CreateJSonArray(args)},\"id\": \"{NextId()}\"";
             message = "{" + message + "}";
             _connector.Send(message);
             return GetCurrentRequestId();

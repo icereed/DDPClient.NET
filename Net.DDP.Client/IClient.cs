@@ -25,7 +25,7 @@
         /// <param name="subscribeTo">Name of the subscription. Matches the name of the server's publish() call.</param>
         /// <param name="args">Optional arguments passed to publisher function on server.</param>
         /// <returns>A handle</returns>
-        int Subscribe(string subscribeTo, params string[] args);
+        int Subscribe(string subscribeTo, params object[] args);
         int GetCurrentRequestId();
 
         IDdpStateTracker StateTracker { get; }
