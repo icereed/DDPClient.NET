@@ -2,16 +2,6 @@
 
 namespace Net.DDP.Client
 {
-
-
-    class NullSubscriber : IDataSubscriber
-    {
-        public void DataReceived(dynamic data)
-        {
-        }
-
-        public string Session { get; set; }
-    }
     public class DDPClient : IClient
     {
         public const string DDP_MESSAGE_TYPE_READY = "ready";
@@ -91,11 +81,9 @@ namespace Net.DDP.Client
 
         private string CreateJSonArray(params object[] args)
         {
-            if (args == null)
-                return "[]";
-            
-            return JsonConvert.SerializeObject(args);
+            return args == null ? "[]" : JsonConvert.SerializeObject(args);
         }
+
         private int NextId()
         {
             return _uniqueId++;

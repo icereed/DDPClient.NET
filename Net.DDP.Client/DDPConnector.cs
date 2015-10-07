@@ -9,7 +9,7 @@ namespace Net.DDP.Client
     {
         private WebSocket _socket;
         private string _url = string.Empty;
-        private int _isWait;
+        private bool _isWait;
 
         public DdpConnector()
         {
@@ -28,7 +28,7 @@ namespace Net.DDP.Client
             _socket = new WebSocket(_url);
             ApplyEventHandler(_socket);
             _socket.Open();
-            _isWait = 1;
+            _isWait = true;
             this.Wait();
             if (_socket.State != WebSocketState.Open)
             {
@@ -155,7 +155,7 @@ namespace Net.DDP.Client
         void _socket_Opened(object sender, EventArgs e)
         {
             this.Send("{\"msg\":\"connect\",\"version\":\"pre1\",\"support\":[\"pre1\"]}");
-            _isWait = 0;
+            _isWait = false;
         }
 
         void socket_MessageReceived(object sender, MessageReceivedEventArgs e)
@@ -165,7 +165,7 @@ namespace Net.DDP.Client
 
         private void Wait()
         {
-            while (_isWait != 0 && _socket.State == WebSocketState.Connecting)
+            while (_isWait && _socket.State == WebSocketState.Connecting)
             {
                 System.Threading.Thread.Sleep(100);
             }
