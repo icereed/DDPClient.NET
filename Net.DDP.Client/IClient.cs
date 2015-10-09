@@ -1,6 +1,8 @@
-﻿namespace Net.DDP.Client
+﻿using System;
+
+namespace Net.DDP.Client
 {
-    public interface IClient
+    public interface IClient : IDisposable
     {
 
 

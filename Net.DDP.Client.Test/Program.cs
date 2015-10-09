@@ -7,20 +7,23 @@ namespace Net.DDP.Client.Test
     {
         static void Main(string[] args)
         {
-            IDdpConnector connector = new DdpConnector();
 
-            connector.OnConnecting += (sender, eventArgs) => Console.WriteLine("--- CONNECTING ---");
-            connector.OnError += (sender, eventArgs) => Console.WriteLine("--- ERROR: "+eventArgs.Message+" ---");
-            connector.OnOpen += (sender, eventArgs) => Console.WriteLine("--- OPEN ---");
-            connector.OnClosed += (sender, eventArgs) => Console.WriteLine("--- CLOSED ---");
+            DDPClient client;
+            using (client = new DDPClient(new Subscriber()))
+            {
+                // Events
+                client.StateTracker.OnConnecting += (sender, eventArgs) => Console.WriteLine("--- CONNECTING ---");
+                client.StateTracker.OnError += (sender, eventArgs) => Console.WriteLine("--- ERROR: " + eventArgs.Message + " ---");
+                client.StateTracker.OnOpen += (sender, eventArgs) => Console.WriteLine("--- OPEN ---");
+                client.StateTracker.OnClosed += (sender, eventArgs) => Console.WriteLine("--- CLOSED ---");
 
-            // Testing by listing all atmosphere packages
-            DDPClient client = new DDPClient(new Subscriber(),connector);
-            client.Connect("atmosphere.meteor.com:443");
-            client.Subscribe("packages");
+                // Testing by listing all atmosphere packages
+                client.Connect("atmosphere.meteor.com:443");
+                client.Subscribe("packages");
+                Console.ReadLine();
+            }
             Console.ReadLine();
-            connector.Close();
-            Console.ReadLine();
+
         }
     }
 

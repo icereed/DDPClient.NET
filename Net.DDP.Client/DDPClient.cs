@@ -95,5 +95,15 @@ namespace Net.DDP.Client
         }
 
         public IDdpStateTracker StateTracker => _connector;
+
+        /// <summary>
+        /// Closes the DDP connection (<see cref="IDdpConnector.Close"/>).
+        /// Please note, that some data might arrive even after disposing.
+        /// </summary>
+        public void Dispose()
+        {
+            _connector.Close();
+            _queueHandler.Dispose();
+        }
     }
 }
