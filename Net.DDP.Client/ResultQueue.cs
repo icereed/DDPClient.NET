@@ -6,43 +6,68 @@ using System.Threading;
 
 namespace Net.DDP.Client
 {
-    internal class ResultQueue
+    /// <summary>
+    /// A queue that will process all queued data serially.
+    /// </summary>
+    public class ResultQueue
     {
         private static ManualResetEvent _enqueuedEvent;
         private static Thread _workerThread;
-        private Queue<string> _jsonItemsQueue;
+        private readonly Queue<string> _itemsQueue;
         private string _currentJsonItem;
-        private JsonDeserializeHelper _serializeHelper;
+        private readonly IDeserializer _deserializer;
 
-        public ResultQueue(IDataSubscriber subscriber)
+        /// <summary>
+        /// Creates a new queue with a custom deserializer.
+        /// </summary>
+        /// <param name="deserializer">A deserializer that will deserialize all incoming data.</param>
+        public ResultQueue(IDeserializer deserializer)
         {
-            this._jsonItemsQueue = new Queue<string>();
-            this._serializeHelper = new JsonDeserializeHelper(subscriber);
+            this._itemsQueue = new Queue<string>();
+            this._deserializer = deserializer;
 
             _enqueuedEvent = new ManualResetEvent(false);
             _workerThread = new Thread(new ThreadStart(PerformDeserilization));
             _workerThread.Start();
         }
 
-        public void AddItem(string jsonItem)
+        /// <summary>
+        /// Creates a new queue for results.
+        /// </summary>
+        /// <param name="subscriber">A subscriber which will receive all queued data serially.</param>
+        public ResultQueue(IDataSubscriber subscriber) : this(new JsonDeserializeHelper(subscriber))
         {
-            lock (_jsonItemsQueue)
-            {
-                _jsonItemsQueue.Enqueue(jsonItem);
-                _enqueuedEvent.Set();
-            }
-            RestartThread();
+
         }
 
+        /// <summary>
+        /// Enqueues a new JSON item as string. The subscriber will get called with the processed object.
+        /// </summary>
+        /// <param name="jsonItem">A JSON item as string.</param>
+        public void QueueItem(string jsonItem)
+        {
+            /* To avoid race condition, because some Thread could dequeue
+            while another thread enqueues data. */
+            lock (_itemsQueue)
+            {
+                _itemsQueue.Enqueue(jsonItem);
+                _enqueuedEvent.Set();
+            }
+            RestartThreadIfNecessary();
+        }
 
+        /// <summary>
+        /// Dequeues in a thread safe manner the next item and returns whether the queue was already empty or not.
+        /// </summary>
+        /// <returns>False if there is nothing to dequeue.</returns>
         private bool Dequeue()
         {
-            lock (_jsonItemsQueue)
+            lock (_itemsQueue)
             {
-                if (_jsonItemsQueue.Count > 0)
+                if (_itemsQueue.Count > 0)
                 {
                     _enqueuedEvent.Reset();
-                    _currentJsonItem = _jsonItemsQueue.Dequeue();
+                    _currentJsonItem = _itemsQueue.Dequeue();
                 }
                 else
                 {
@@ -53,21 +78,25 @@ namespace Net.DDP.Client
             }
         }
 
-        public void RestartThread()
+        /// <summary>
+        /// If the worker thread already stopped it will get restarted.
+        /// </summary>
+        public void RestartThreadIfNecessary()
         {
-            if (_workerThread.ThreadState == ThreadState.Stopped)
-            {
-                _workerThread.Abort();
-                _workerThread = new Thread(new ThreadStart(PerformDeserilization));
-                _workerThread.Start();
-            }
+            if (_workerThread.ThreadState != ThreadState.Stopped) return;
+            _workerThread.Abort();
+            _workerThread = new Thread(new ThreadStart(PerformDeserilization));
+            _workerThread.Start();
         }
 
+        /// <summary>
+        /// Processes and dequeues all items. Will be executed in seperate thread.
+        /// </summary>
         private void PerformDeserilization()
         {
             while (Dequeue())
             {
-                _serializeHelper.Deserialize(_currentJsonItem);
+                _deserializer.Deserialize(_currentJsonItem);
             }
         }
     }

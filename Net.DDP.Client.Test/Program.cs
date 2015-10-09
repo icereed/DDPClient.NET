@@ -27,7 +27,7 @@ namespace Net.DDP.Client.Test
     public class Subscriber : IDataSubscriber
     {
         // Atmosphere packages list
-        private readonly List<String> _packages = new List<String>();
+        private readonly List<string> _packages = new List<string>();
         public string Session { get; set; }
         public void DataReceived(dynamic data)
         {

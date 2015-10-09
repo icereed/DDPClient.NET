@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Net.DDP.Client
 {
-    internal class JsonDeserializeHelper
+    internal class JsonDeserializeHelper : IDeserializer
     {
         private readonly IDataSubscriber _subscriber;
 
@@ -15,9 +15,9 @@ namespace Net.DDP.Client
             _subscriber = subscriber;
         }
 
-        internal void Deserialize(string jsonItem)
+        public void Deserialize(string item)
         {
-            JObject jObj = JObject.Parse(jsonItem);
+            JObject jObj = JObject.Parse(item);
 
             if (jObj[DDPClient.DDP_PROPS_ERROR] != null || jObj[DDPClient.DDP_PROPS_MESSAGE] != null && jObj[DDPClient.DDP_PROPS_MESSAGE].ToString() == "error")
                 HandleError(jObj[DDPClient.DDP_PROPS_ERROR] ?? jObj);
@@ -63,30 +63,28 @@ namespace Net.DDP.Client
         {
             dynamic entity = new ExpandoObject();
 
-            if (jObj[DDPClient.DDP_PROPS_MESSAGE].ToString() == DDPClient.DDP_MESSAGE_TYPE_ADDED)
+            switch (jObj[DDPClient.DDP_PROPS_MESSAGE].ToString())
             {
-                entity = GetMessageData(jObj);
+                case DDPClient.DDP_MESSAGE_TYPE_ADDED:
+                    entity = GetMessageData(jObj);
 
-                entity.Type = DDPType.Added;
-            }
-            else if (jObj[DDPClient.DDP_PROPS_MESSAGE].ToString() == DDPClient.DDP_MESSAGE_TYPE_CHANGED)
-            {
-                entity = GetMessageData(jObj);
-                entity.Type = DDPType.Changed;
-            }
-            else if (jObj[DDPClient.DDP_PROPS_MESSAGE].ToString() == DDPClient.DDP_MESSAGE_TYPE_NOSUB)
-            {
-                HandleError(jObj[DDPClient.DDP_PROPS_ERROR]);
-            }
-            else if (jObj[DDPClient.DDP_PROPS_MESSAGE].ToString() == DDPClient.DDP_MESSAGE_TYPE_READY)
-            {
-                entity.RequestsIds = ((JArray)jObj[DDPClient.DDP_PROPS_SUBS]).Select(id => id.Value<int>()).ToArray();
-                entity.Type = DDPType.Ready;
-            }
-            else if (jObj[DDPClient.DDP_PROPS_MESSAGE].ToString() == DDPClient.DDP_MESSAGE_TYPE_REMOVED)
-            {
-                entity = GetMessageData(jObj);
-                entity.Type = DDPType.Removed;
+                    entity.Type = DDPType.Added;
+                    break;
+                case DDPClient.DDP_MESSAGE_TYPE_CHANGED:
+                    entity = GetMessageData(jObj);
+                    entity.Type = DDPType.Changed;
+                    break;
+                case DDPClient.DDP_MESSAGE_TYPE_NOSUB:
+                    HandleError(jObj[DDPClient.DDP_PROPS_ERROR]);
+                    break;
+                case DDPClient.DDP_MESSAGE_TYPE_READY:
+                    entity.RequestsIds = ((JArray) jObj[DDPClient.DDP_PROPS_SUBS]).Select(id => id.Value<int>()).ToArray();
+                    entity.Type = DDPType.Ready;
+                    break;
+                case DDPClient.DDP_MESSAGE_TYPE_REMOVED:
+                    entity = GetMessageData(jObj);
+                    entity.Type = DDPType.Removed;
+                    break;
             }
 
             _subscriber.DataReceived(entity);

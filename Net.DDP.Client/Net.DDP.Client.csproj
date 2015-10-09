@@ -57,6 +57,7 @@
     <Compile Include="IDataSubscriber.cs" />
     <Compile Include="IDDPConnector.cs" />
     <Compile Include="IDdpStateTracker.cs" />
+    <Compile Include="IDeserializer.cs" />
     <Compile Include="JsonDeserializeHelper.cs" />
     <Compile Include="NullSubscriber.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

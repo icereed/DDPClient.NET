@@ -27,7 +27,7 @@ namespace Net.DDP.Client
         {
             _connector = connector;
             _queueHandler = new ResultQueue(subscriber);
-            _connector.OnMessageReceived += (sender, args) => _queueHandler.AddItem(args.Message);
+            _connector.OnMessageReceived += (sender, args) => _queueHandler.QueueItem(args.Message);
             _uniqueId = 1;
         }
 
