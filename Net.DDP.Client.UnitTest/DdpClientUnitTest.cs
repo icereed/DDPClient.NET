@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using WebSocket4Net;
 
 namespace Net.DDP.Client.UnitTest
@@ -9,49 +10,42 @@ namespace Net.DDP.Client.UnitTest
     [TestClass]
     public class DdpClientUnitTest
     {
-        class TestSendImpl : IDdpConnector
+
+        private static string RemoveWhitespaces(string message)
         {
-            public event EventHandler OnConnecting;
-            public event EventHandler OnOpen;
-            public event EventHandler<DdpConnectionError> OnError;
-            public event EventHandler OnClosed;
-            public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
-            public ConnectionState State { get; }
-            public string AssertSendMessage { get; set; }
-
-            public void Close()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Connect(string url, bool useSsl = true)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Send(string message)
-            {
-                message = RemoveWhitespaces(message);
-                var expected = RemoveWhitespaces(AssertSendMessage);
-                Assert.AreEqual(expected, message);
-            }
-
-            private static string RemoveWhitespaces(string message)
-            {
-                return Regex.Replace(message, @"\s+", "");
-            }
+            return Regex.Replace(message, @"\s+", "");
         }
 
-
-
         [TestMethod]
-        public void TestCall()
+        public void Call_WithTwoParameters_FormsCorrectJsonString()
         {
-            var connector = new TestSendImpl();
+            /* ---- Arrange ---- */
+            var mock = new Mock<IDdpConnector>();
 
+            // Calling with two parameters
+            const string callWithTwoName = "testCallWithTwo";
+            string callWithTwoResult = String.Empty;
+
+            mock.Setup(foo => foo.Send(It.Is<string>(sendMessage => sendMessage.Contains(callWithTwoName))))
+                .Callback<string>(((message) => { callWithTwoResult = RemoveWhitespaces(message); }));
+
+            // Calling with two parameters in reversed order
+            const string testCallWithTwoReversedName = "testCallWithTwoReversed";
+            string testCallWithTwoReversedResult = String.Empty;
+
+
+            mock.Setup(foo => foo.Send(It.Is<string>(sendMessage => sendMessage.Contains(testCallWithTwoReversedName))))
+                .Callback<string>(((message) => { testCallWithTwoReversedResult = RemoveWhitespaces(message); }));
+
+
+            // Setting up SUT
+            var connector = mock.Object;
             var ddpClient = new DDPClient(connector);
 
-            var dict = new Dictionary<string, string>
+            // Parameters
+            var parameter1 = "sampleString";
+
+            var parameter2 = new Dictionary<string, string>
             {
                 { "key1", "value1" },
                 { "key2", "value2" }
@@ -59,45 +53,134 @@ namespace Net.DDP.Client.UnitTest
 
             var id = ddpClient.GetCurrentRequestId();
 
-            #region Test Call
-            connector.AssertSendMessage = "{ \"msg\":\"method\",\"method\":\"testCall\",\"params\":[\"sampleString\",{\"key1\":\"value1\",\"key2\":\"value2\"}],\"id\":\"" + id + "\"}";
-            ddpClient.Call("testCall", "sampleString", dict);
-
-            id++;
-            Assert.AreEqual(id, ddpClient.GetCurrentRequestId());
-            // Switch order
-            connector.AssertSendMessage = "{ \"msg\":\"method\",\"method\":\"testCall\",\"params\":[{\"key1\":\"value1\",\"key2\":\"value2\"}, \"123456789\"],\"id\":\"" + id + "\"}";
-            ddpClient.Call("testCall", dict, "123456789");
-
-            id++;
-            Assert.AreEqual(id, ddpClient.GetCurrentRequestId());
-
-            // Without params
-            connector.AssertSendMessage = "{ \"msg\":\"method\",\"method\":\"testCallWithout\",\"params\":[ ],\"id\":\"" + id + "\"}";
-            ddpClient.Call("testCallWithout");
-            id++;
-            Assert.AreEqual(id, ddpClient.GetCurrentRequestId());
-            #endregion
+            /* ---- Act ---- */
+            ddpClient.Call(callWithTwoName, parameter1, parameter2);
+            ddpClient.Call(testCallWithTwoReversedName, parameter2, parameter1);
 
 
-            #region Test subscribe
-            // Without params
-            connector.AssertSendMessage = "{ \"msg\":\"sub\",\"name\":\"testSubWithout\",\"params\":[ ],\"id\":\"" + id + "\"}";
-            var returnHandle = ddpClient.Subscribe("testSubWithout");
-            id++;
-            Assert.AreEqual(id, ddpClient.GetCurrentRequestId());
-            Assert.AreEqual(id, returnHandle);
+            /* ---- Assert ---- */
+            var expectedResultForCallWithTwo = RemoveWhitespaces(
+                    "{ \"msg\":\"method\",\"method\":\"testCallWithTwo\",\"params\":[\"sampleString\",{\"key1\":\"value1\",\"key2\":\"value2\"}],\"id\":\"" + id + "\"}");
+            Assert.AreEqual(expectedResultForCallWithTwo, callWithTwoResult);
 
+            var expectedResultForReversed = RemoveWhitespaces(
+                    "{ \"msg\":\"method\",\"method\":\"testCallWithTwoReversed\",\"params\":[{\"key1\":\"value1\",\"key2\":\"value2\"}, \"sampleString\"],\"id\":\"" + (id + 1) + "\"}");
+            Assert.AreEqual(expectedResultForReversed, testCallWithTwoReversedResult);
 
-            // With params
-            connector.AssertSendMessage = "{ \"msg\":\"sub\",\"name\":\"testSubWithParams\",\"params\":[\"sampleString\",{\"key1\":\"value1\",\"key2\":\"value2\"}],\"id\":\"" + id + "\"}";
-            returnHandle = ddpClient.Subscribe("testSubWithParams", "sampleString", dict);
-
-            id++;
-            Assert.AreEqual(id, ddpClient.GetCurrentRequestId());
-            Assert.AreEqual(id, returnHandle);
-            #endregion
+            mock.Verify(ddpConnector => ddpConnector.Send(It.IsAny<string>()), Times.Exactly(2));
 
         }
+
+        [TestMethod]
+        public void Call_WithoutParameters_FormsCorrectJsonString()
+        {
+            /* ---- Arrange ---- */
+            var mock = new Mock<IDdpConnector>();
+
+            // Calling with without parameter
+            const string callWithoutName = "testCallWithout";
+            string callWithoutResult = String.Empty;
+
+            mock.Setup(foo => foo.Send(It.Is<string>(sendMessage => sendMessage.Contains(callWithoutName))))
+                .Callback<string>(((message) => { callWithoutResult = RemoveWhitespaces(message); }));
+
+            // Setting up SUT
+            var connector = mock.Object;
+            var ddpClient = new DDPClient(connector);
+
+
+            var id = ddpClient.GetCurrentRequestId();
+
+            /* ---- Act ---- */
+            ddpClient.Call(callWithoutName);
+
+
+            /* ---- Assert ---- */
+            var expectedResultForCallWithout = RemoveWhitespaces(
+                    "{ \"msg\":\"method\",\"method\":\"testCallWithout\",\"params\":[ ],\"id\":\"" + id + "\"}");
+            Assert.AreEqual(expectedResultForCallWithout, callWithoutResult);
+
+
+            mock.Verify(ddpConnector => ddpConnector.Send(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void Subscribe_WithTwoParameters_FormsCorrectJsonString()
+        {
+            /* ---- Arrange ---- */
+            var mock = new Mock<IDdpConnector>();
+
+            // Subscribe with two parameters
+            const string subscribeWithTwoName = "testSubWithParams";
+            string subscribeWithTwoResult = String.Empty;
+
+            mock.Setup(ddpConnector => ddpConnector.Send(It.Is<string>(sendMessage => sendMessage.Contains(subscribeWithTwoName))))
+                .Callback<string>(((message) => { subscribeWithTwoResult = RemoveWhitespaces(message); }));
+
+
+            // Setting up SUT
+            var connector = mock.Object;
+            var ddpClient = new DDPClient(connector);
+
+            // Parameters
+            var parameter1 = "sampleString";
+
+            var parameter2 = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" }
+            };
+
+            var id = ddpClient.GetCurrentRequestId();
+
+            /* ---- Act ---- */
+            ddpClient.Subscribe(subscribeWithTwoName, parameter1, parameter2);
+
+            /* ---- Assert ---- */
+            var expectedResultForSubscribeWithTwo = RemoveWhitespaces(
+                    "{ \"msg\":\"sub\",\"name\":\"testSubWithParams\",\"params\":[\"sampleString\",{\"key1\":\"value1\",\"key2\":\"value2\"}],\"id\":\"" + id + "\"}");
+            Assert.AreEqual(expectedResultForSubscribeWithTwo, subscribeWithTwoResult);
+
+            mock.Verify(ddpConnector => ddpConnector.Send(It.IsAny<string>()), Times.Once);
+
+        }
+
+        /// <summary>
+        /// We will subscribe on a <see cref="DDPClient"/> without parameters and compare the output sent by an <see cref="IDdpConnector"/> mockup.
+        /// </summary>
+        [TestMethod]
+        public void Subscribe_WithoutParameters_FormsCorrectJsonString()
+        {
+            /* ---- Arrange ---- */
+            var mock = new Mock<IDdpConnector>();
+
+            // Calling with without parameter
+            const string subscribeWithoutName = "testSubWithout";
+            string subscribeWithoutResult = String.Empty;
+
+            mock.Setup(foo => foo.Send(It.Is<string>(sendMessage => sendMessage.Contains(subscribeWithoutName))))
+                .Callback<string>(((message) => { subscribeWithoutResult = RemoveWhitespaces(message); }));
+
+
+            // Setting up SUT
+            var connector = mock.Object;
+            var ddpClient = new DDPClient(connector);
+
+
+            var id = ddpClient.GetCurrentRequestId();
+
+            /* ---- Act ---- */
+            ddpClient.Subscribe(subscribeWithoutName);
+
+
+            /* ---- Assert ---- */
+            var expectedResultForSubscribeWithout = RemoveWhitespaces(
+                   "{ \"msg\":\"sub\",\"name\":\"testSubWithout\",\"params\":[ ],\"id\":\"" + id + "\"}");
+            Assert.AreEqual(expectedResultForSubscribeWithout, subscribeWithoutResult);
+
+
+            mock.Verify(ddpConnector => ddpConnector.Send(It.IsAny<string>()), Times.Once);
+        }
+        
     }
 }
