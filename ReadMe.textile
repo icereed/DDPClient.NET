@@ -1,26 +1,35 @@
-*DDP Client for .NET*
+*Stargazer.NET Alpha - A DDP Client for .NET*
+Heavily developed and NOT stable yet!
+There will be a lot of breaking changes in the near future until mid of November.
 
-DDPClient.NET is a library to connect to DDP server. DDP is the protocol used in Meteor. Using DDPClient.NET you can subscribe to published items or call a Meteor method and display the same in your ASP.NET or Desktop applications.
+Stargazer is a library to connect to DDP server. DDP is the protocol used in Meteor. Using Stargazer you can subscribe to published items or call a Meteor method and display the same in your ASP.NET or Desktop applications.
+
+*New features*
+- Tested API: A unit test code coverage over 90% tries to get achieved.
+- State tracking: You are able to track the state of the connection and you may act on certain events.
+- More extensible architecture: It is tried to achieve an extensible architecture, so you can use components seperately or inject your own.
+- A full documented API: There will be a documentation.
 
 *NuGet package*
-You can easily install DDPClient via NuGet:
-<pre><code>Install-Package DDPClient.Net</code></pre>
-NuGet page: http://www.nuget.org/packages/DDPClient.Net/
+Currently there is no NuGet package of this fork. Please refer to https://github.com/OzTK/DDPClient.NET for a NuGet package of a previous version.
 
 *How to Subscribe to a published item*
 
-It is very easy with the help of DDPClient.NET. See the code below.
+It is very easy with the help of Stargazer. See the code below.
 
 <pre><code>
 	static void Main(string[] args)
 	{
 		IDataSubscriber subscriber = new Subscriber();
-		DDPClient client = new DDPClient(sub);
+		DDPClient client;
 
-		client.Connect("localhost:3000");
-		client.Subscribe("allproducts");
+		using (client = new DDPClient(sub)) {
+			client.Connect("localhost:3000");
+			client.Subscribe("allproducts");
+			Console.ReadLine(); // Wait for completion
+		} // End of using block causes the client to close the connection.
 	}
-	
+
     public class Subscriber:IDataSubscriber
     {
         public void DataReceived(dynamic data)
@@ -37,14 +46,14 @@ It is very easy with the help of DDPClient.NET. See the code below.
                 throw;
             }
         }
-    }		
-	
+    }
+
 </code></pre>
 
 As you can see in the main function, I specified the url where my Meteor application is running. Then I subscribed to 'appproducts', which I Published in my Meteor application as shown below.
 
 <pre><code>
-	if(Meteor.is_server)
+	if(Meteor.isServer)
 	{
 		Meteor.publish("allproducts", function(){
 			return Products.find();
@@ -52,7 +61,7 @@ As you can see in the main function, I specified the url where my Meteor applica
 	}
 </code></pre>
 
-I used a console application here to demonstrate how to use DDPClient.NET. If you run the console application it will write all the items in the Products to the console. Also the console will show product in realtime if any new products inserted to the database.
+I used a console application here to demonstrate how to use Stargazer. If you run the console application it will write all the items in the Products to the console. Also the console will show product in realtime if any new products inserted to the database.
 
 *How to call a method*
 
@@ -64,10 +73,13 @@ Let's see how to invoke a method in Meteor.
 		IDataSubscriber subscriber = new Subscriber();
 		DDPClient client = new DDPClient(sub);
 
-		client.Connect("localhost:3000");
-		client.Call("addProduct", "NS5", "IRobot");
+		using (client = new DDPClient(sub)) {
+			client.Connect("localhost:3000");
+			client.Call("addProduct", "NS5", "IRobot");
+			Console.ReadLine(); // Wait for response
+		}
 	}
-	
+
     public class Subscriber:IDataSubscriber
     {
         public void DataReceived(dynamic data)
@@ -82,13 +94,13 @@ Let's see how to invoke a method in Meteor.
                 throw;
             }
         }
-    }		
+    }
 </code></pre>
 
 As you can see I am invoking a method called 'addProduct' with two parameters. See the meteor code below, as you can see addProduct accepts two parameters prodCode and prodDesc.
 
 <pre><code>
-if(Meteor.is_server)
+if(Meteor.isServer)
 {
     Meteor.publish("allproducts", function(){
         return Products.find();
@@ -105,5 +117,3 @@ if(Meteor.is_server)
     });
 }
 </code></pre>
-
-
