@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using WebSocket4Net;
+using NUnit.Framework;
+using Assert = NUnit.Framework.Assert;
 
 namespace Net.DDP.Client.UnitTest
 {
-    [TestClass]
+    [TestFixture()]
     public class DdpClientUnitTest
     {
 
@@ -16,7 +16,7 @@ namespace Net.DDP.Client.UnitTest
             return Regex.Replace(message, @"\s+", "");
         }
 
-        [TestMethod]
+        [Test()]
         public void Call_WithTwoParameters_FormsCorrectJsonString()
         {
             /* ---- Arrange ---- */
@@ -71,7 +71,7 @@ namespace Net.DDP.Client.UnitTest
 
         }
 
-        [TestMethod]
+        [Test()]
         public void Call_WithoutParameters_FormsCorrectJsonString()
         {
             /* ---- Arrange ---- */
@@ -104,7 +104,7 @@ namespace Net.DDP.Client.UnitTest
             mock.Verify(ddpConnector => ddpConnector.Send(It.IsAny<string>()), Times.Once);
         }
 
-        [TestMethod]
+        [Test()]
         public void Subscribe_WithTwoParameters_FormsCorrectJsonString()
         {
             /* ---- Arrange ---- */
@@ -148,7 +148,7 @@ namespace Net.DDP.Client.UnitTest
         /// <summary>
         /// We will subscribe on a <see cref="DDPClient"/> without parameters and compare the output sent by an <see cref="IDdpConnector"/> mockup.
         /// </summary>
-        [TestMethod]
+        [Test()]
         public void Subscribe_WithoutParameters_FormsCorrectJsonString()
         {
             /* ---- Arrange ---- */
@@ -181,6 +181,35 @@ namespace Net.DDP.Client.UnitTest
 
             mock.Verify(ddpConnector => ddpConnector.Send(It.IsAny<string>()), Times.Once);
         }
-        
+
+
+        [Test()]
+        public void ConnectAndDispose_ConnectsAndClosesAllThreadsAndConnectionsAfterwards()
+        {
+            /* ---- Arrange ---- */
+            var mockConnector = new Mock<IDdpConnector>();
+            var mockQueueProcessor = new Mock<IQueueProcessor>();
+
+            var systemUnderTest = new DDPClient(connector: mockConnector.Object, queueProcessor: mockQueueProcessor.Object);
+
+            /* ---- Act ---- */
+            systemUnderTest.Connect("example.com:1337", false);
+            systemUnderTest.Dispose();
+
+            /* ---- Assert ---- */
+
+            // The connector must be returned as the state tracker to avoid inconsistencies.
+            Assert.That(systemUnderTest.StateTracker, Is.SameAs(mockConnector.Object));
+
+            // For Connect
+            mockConnector.Verify(connector => connector.Connect("example.com:1337", false),Times.Once);
+
+            // For Dispose
+            mockConnector.Verify(connector => connector.Close(), Times.Once);
+            mockQueueProcessor.Verify(queueProcessor => queueProcessor.Dispose(), Times.Once);
+
+
+        }
+
     }
 }

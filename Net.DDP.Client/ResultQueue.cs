@@ -9,12 +9,17 @@ namespace Net.DDP.Client
     /// <summary>
     /// A queue that will process all queued data serially.
     /// </summary>
-    public class ResultQueue : IDisposable
+    public class ResultQueue : IQueueProcessor
     {
         /// <summary>
-        /// Gets used to block or continue the worker thread.
+        /// Used in order to block or continue the worker thread.
         /// </summary>
         private static ManualResetEvent _blockThreadEvent;
+        /// <summary>
+        /// Used in order to block or continue the waiter thread.
+        /// See <see cref="BlockUntilNothingLeftInQueue"/>.
+        /// </summary>
+        private static ManualResetEvent _blockWaiterThreadEvent;
 
         private readonly Queue<string> _itemsQueue;
         private string _currentJsonItem;
@@ -37,6 +42,7 @@ namespace Net.DDP.Client
             _disposeFlag = false;
 
             _blockThreadEvent = new ManualResetEvent(false);
+            _blockWaiterThreadEvent = new ManualResetEvent(false);
             var workerThread = new Thread(DeserilizationLoop);
             workerThread.Start();
         }
@@ -108,6 +114,9 @@ namespace Net.DDP.Client
                 {
                     // Deserialize next item
                     _deserializer.Deserialize(_currentJsonItem);
+
+                    // Waiter thread checks now if there are any items left in queue
+                    _blockWaiterThreadEvent.Set(); 
                 }
                 else
                 {
@@ -120,7 +129,33 @@ namespace Net.DDP.Client
         public void Dispose()
         {
             _disposeFlag = true;
-            _blockThreadEvent.Set(); // Unblocks worker thread, in order DeserilizationLoop can finish
+            _blockThreadEvent.Set(); // Unblocks worker thread so DeserilizationLoop can finish
+        }
+
+        /// <summary>
+        /// Blocks the calling thread until the queue is empty. Mainly used for testing.
+        /// </summary>
+        public void BlockUntilNothingLeftInQueue()
+        {
+            // Signals whether the queue has no elements.
+            bool queueEmpty;
+            do
+            {
+                lock (_itemsQueue)
+                {
+                    queueEmpty = _itemsQueue.Count <= 0;
+                }
+
+                // If still not empty, block the thread.
+                if (!queueEmpty)
+                {
+                    /** 
+                    *   Blocks the thread.
+                    *   Gets unblocked whenever an item gets deserialized and then checks the queue again.
+                    */
+                    _blockWaiterThreadEvent.Reset();
+                }
+            } while (!queueEmpty);
         }
     }
 }

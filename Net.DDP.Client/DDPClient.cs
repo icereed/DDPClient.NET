@@ -21,21 +21,21 @@ namespace Net.DDP.Client
 
         private readonly IDdpConnector _connector;
         private int _uniqueId;
-        private readonly ResultQueue _queueHandler;
+        private readonly IQueueProcessor _queueHandler;
 
-        public DDPClient(IDataSubscriber subscriber, IDdpConnector connector)
+        public DDPClient(IDdpConnector connector, IQueueProcessor queueProcessor)
         {
             _connector = connector;
-            _queueHandler = new ResultQueue(subscriber);
+            _queueHandler = queueProcessor;
             _connector.OnMessageReceived += (sender, args) => _queueHandler.QueueItem(args.Message);
             _uniqueId = 1;
         }
 
-        public DDPClient(IDataSubscriber subscriber) : this(subscriber, new DdpConnector())
+        public DDPClient(IDataSubscriber subscriber) : this(new DdpConnector(), new ResultQueue(subscriber))
         {
         }
 
-        public DDPClient(IDdpConnector connector) : this(new NullSubscriber(),connector)
+        public DDPClient(IDdpConnector connector) : this(connector, new ResultQueue(new NullSubscriber()))
         {
         }
 
