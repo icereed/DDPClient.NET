@@ -1,8 +1,0 @@
-language: csharp
-solution: Stargazer.NET.sln
-install:
-  - nuget restore Stargazer.NET.sln
-  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
-script:
-  - xbuild /p:Configuration=Release Stargazer.NET.sln
-  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./Net.DDP.Client.UnitTest/bin/Release/Net.DDP.Client.UnitTest.dll
