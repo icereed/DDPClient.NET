@@ -7,11 +7,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
+using Net.DDP.Client.Queueing;
 
 namespace Net.DDP.Client.UnitTest
 {
     [TestFixture()]
-    public class ResultQueueTests
+    public class DefaultQueueProcessorTests
     {
         [Test()]
         public void QueueItem_AllItemsShouldGetProcess_WhenItemsGetFasterAddedThanProcessed()
@@ -22,7 +23,7 @@ namespace Net.DDP.Client.UnitTest
                    .Callback(() => Thread.Sleep(50));
 
 
-            var systemUnderTest = new ResultQueue(mockDeserializer.Object);
+            var systemUnderTest = new DefaultQueueProcessor<string>(mockDeserializer.Object.Deserialize);
 
             var testElements = 100;
 
@@ -47,7 +48,7 @@ namespace Net.DDP.Client.UnitTest
             /** ---- Arrange ---- */
             Mock<IDeserializer> mockDeserializer = new Mock<IDeserializer>();
 
-            var systemUnderTest = new ResultQueue(mockDeserializer.Object);
+            var systemUnderTest = new DefaultQueueProcessor<string>(mockDeserializer.Object.Deserialize);
 
             var testElements = 100;
 
@@ -67,19 +68,18 @@ namespace Net.DDP.Client.UnitTest
         }
 
         [Test()]
-        [ExpectedException("System.InvalidOperationException")]
-        public void QueueItem_ThrowsException_WhenAlreadyDisposed()
+        public void QueueItem_ThrowsNoException_WhenAlreadyDisposed()
         {
             /** ---- Arrange ---- */
             Mock<IDeserializer> mockDeserializer = new Mock<IDeserializer>();
 
-            var systemUnderTest = new ResultQueue(mockDeserializer.Object);
+            var systemUnderTest = new DefaultQueueProcessor<string>(mockDeserializer.Object.Deserialize);
 
             /** ---- Act ---- */
             systemUnderTest.Dispose();
 
             /** ---- Assert ---- */
-            systemUnderTest.QueueItem("This should throw an exception.");
+            systemUnderTest.QueueItem("This should not throw an exception.");
         }
     }
 }

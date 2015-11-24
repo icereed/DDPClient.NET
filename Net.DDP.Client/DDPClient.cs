@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Net.DDP.Client.Queueing;
+using Newtonsoft.Json;
 
 namespace Net.DDP.Client
 {
@@ -21,9 +22,9 @@ namespace Net.DDP.Client
 
         private readonly IDdpConnector _connector;
         private int _uniqueId;
-        private readonly IQueueProcessor _queueHandler;
+        private readonly IQueueProcessor<string> _queueHandler;
 
-        public DDPClient(IDdpConnector connector, IQueueProcessor queueProcessor)
+        public DDPClient(IDdpConnector connector, IQueueProcessor<string> queueProcessor)
         {
             _connector = connector;
             _queueHandler = queueProcessor;
@@ -31,11 +32,11 @@ namespace Net.DDP.Client
             _uniqueId = 1;
         }
 
-        public DDPClient(IDataSubscriber subscriber) : this(new DdpConnector(), new ResultQueue(subscriber))
+        public DDPClient(IDataSubscriber subscriber) : this(new DdpConnector(), new DefaultQueueProcessor<string>(new JsonDeserializeHelper(subscriber).Deserialize))
         {
         }
 
-        public DDPClient(IDdpConnector connector) : this(connector, new ResultQueue(new NullSubscriber()))
+        public DDPClient(IDdpConnector connector) : this(connector, new DefaultQueueProcessor<string>(new JsonDeserializeHelper(new NullSubscriber()).Deserialize))
         {
         }
 

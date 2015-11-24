@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Moq;
+using Net.DDP.Client.Queueing;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
 
@@ -188,7 +189,7 @@ namespace Net.DDP.Client.UnitTest
         {
             /* ---- Arrange ---- */
             var mockConnector = new Mock<IDdpConnector>();
-            var mockQueueProcessor = new Mock<IQueueProcessor>();
+            var mockQueueProcessor = new Mock<IQueueProcessor<string>>();
 
             var systemUnderTest = new DDPClient(connector: mockConnector.Object, queueProcessor: mockQueueProcessor.Object);
 

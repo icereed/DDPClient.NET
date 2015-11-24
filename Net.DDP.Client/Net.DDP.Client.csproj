@@ -58,11 +58,11 @@
     <Compile Include="IDDPConnector.cs" />
     <Compile Include="IDdpStateTracker.cs" />
     <Compile Include="IDeserializer.cs" />
-    <Compile Include="IQueueProcessor.cs" />
     <Compile Include="JsonDeserializeHelper.cs" />
     <Compile Include="NullSubscriber.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResultQueue.cs" />
+    <Compile Include="Queueing\DefaultQueueProcessor.cs" />
+    <Compile Include="Queueing\IQueueProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
