@@ -5,20 +5,20 @@ namespace Net.DDP.Client
 {
     public class DDPClient : IClient
     {
-        public const string DDP_MESSAGE_TYPE_READY = "ready";
-        public const string DDP_MESSAGE_TYPE_ADDED = "added";
-        public const string DDP_MESSAGE_TYPE_CHANGED = "changed";
-        public const string DDP_MESSAGE_TYPE_NOSUB = "nosub";
-        public const string DDP_MESSAGE_TYPE_REMOVED = "removed";
+        public const string DdpMessageTypeReady = "ready";
+        public const string DdpMessageTypeAdded = "added";
+        public const string DdpMessageTypeChanged = "changed";
+        public const string DdpMessageTypeNosub = "nosub";
+        public const string DdpMessageTypeRemoved = "removed";
 
-        public const string DDP_PROPS_MESSAGE = "msg";
-        public const string DDP_PROPS_ID = "id";
-        public const string DDP_PROPS_COLLECTION = "collection";
-        public const string DDP_PROPS_FIELDS = "fields";
-        public const string DDP_PROPS_SESSION = "session";
-        public const string DDP_PROPS_RESULT = "result";
-        public const string DDP_PROPS_ERROR = "error";
-        public const string DDP_PROPS_SUBS = "subs";
+        public const string DdpPropsMessage = "msg";
+        public const string DdpPropsId = "id";
+        public const string DdpPropsCollection = "collection";
+        public const string DdpPropsFields = "fields";
+        public const string DdpPropsSession = "session";
+        public const string DdpPropsResult = "result";
+        public const string DdpPropsError = "error";
+        public const string DdpPropsSubs = "subs";
 
         private readonly IDdpConnector _connector;
         private int _uniqueId;
@@ -44,10 +44,14 @@ namespace Net.DDP.Client
         /// Connects to a Meteor application websocket.
         /// </summary>
         /// <param name="url">The URL of the Meteor application without protocol and "/websocket" suffix. E.g. "localhost:3000"</param>
-        /// <param name="useSSL">Whether to use SSL. True by default.</param>
-        public void Connect(string url, bool useSSL = true)
+        public void ConnectWithSsl(string url)
         {
-            _connector.Connect(url, useSSL);
+            _connector.Connect(url, true);
+        }
+
+        public void ConnectWithoutSsl(string url)
+        {
+            _connector.Connect(url, false);
         }
 
         /// <summary>
@@ -103,7 +107,10 @@ namespace Net.DDP.Client
         /// </summary>
         public void Dispose()
         {
-            _connector.Close();
+            if (_connector.State != ConnectionState.Closed)
+            {
+                _connector.Close();
+            }
             _queueHandler.Dispose();
         }
     }

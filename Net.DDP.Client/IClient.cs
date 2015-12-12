@@ -8,11 +8,16 @@ namespace Net.DDP.Client
 
 
         /// <summary>
+        /// Connects to a Meteor application websocket with a SSL connection.
+        /// </summary>
+        /// <param name="url">The URL of the Meteor application without protocol and "/websocket" suffix. E.g. "localhost:3000"</param>
+        void ConnectWithSsl(string url);
+
+        /// <summary>
         /// Connects to a Meteor application websocket.
         /// </summary>
         /// <param name="url">The URL of the Meteor application without protocol and "/websocket" suffix. E.g. "localhost:3000"</param>
-        /// <param name="useSSL">Whether to use SSL. True by default.</param>
-        void Connect(string url, bool useSSL = true);
+        void ConnectWithoutSsl(string url);
 
         /// <summary>
         /// Invokes a meteor server method passing any number of arguments.

@@ -32,7 +32,7 @@ namespace Net.DDP.Client
             this.Wait();
             if (_socket.State != WebSocketState.Open)
             {
-                throw new SocketException();
+                RaiseOnError(new SocketException());
             }
         }
 
@@ -118,7 +118,7 @@ namespace Net.DDP.Client
         {
             if (State == ConnectionState.Closed)
             {
-                throw new InvalidOperationException("The DDP connection may not be closed in order to close it.");
+                throw new InvalidOperationException("The DDP connection may not be already closed in order to close it.");
             }
             _socket.Close();
             _socket.MessageReceived -= socket_MessageReceived;

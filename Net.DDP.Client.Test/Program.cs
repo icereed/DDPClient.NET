@@ -18,7 +18,7 @@ namespace Net.DDP.Client.Test
                 client.StateTracker.OnClosed += (sender, eventArgs) => Console.WriteLine("--- CLOSED ---");
 
                 // Testing by listing all atmosphere packages
-                client.Connect("atmosphere.meteor.com:443");
+                client.ConnectWithSsl("atmosphere.meteor.com:443");
                 client.Subscribe("packages");
                 Console.ReadLine();
             }

@@ -19,20 +19,20 @@ namespace Net.DDP.Client
         {
             JObject jObj = JObject.Parse(item);
 
-            if (jObj[DDPClient.DDP_PROPS_ERROR] != null || jObj[DDPClient.DDP_PROPS_MESSAGE] != null && jObj[DDPClient.DDP_PROPS_MESSAGE].ToString() == "error")
-                HandleError(jObj[DDPClient.DDP_PROPS_ERROR] ?? jObj);
-            else if (jObj[DDPClient.DDP_PROPS_SESSION] != null)
+            if (jObj[DDPClient.DdpPropsError] != null || jObj[DDPClient.DdpPropsMessage] != null && jObj[DDPClient.DdpPropsMessage].ToString() == "error")
+                HandleError(jObj[DDPClient.DdpPropsError] ?? jObj);
+            else if (jObj[DDPClient.DdpPropsSession] != null)
                 HandleConnected(jObj);
-            else if (jObj[DDPClient.DDP_PROPS_MESSAGE] != null)
+            else if (jObj[DDPClient.DdpPropsMessage] != null)
                 HandleSubResult(jObj);
-            else if (jObj[DDPClient.DDP_PROPS_RESULT] != null)
+            else if (jObj[DDPClient.DdpPropsResult] != null)
                 HandleMethodResult(jObj);
         }
 
         private void HandleConnected(JObject jObj)
         {
             dynamic entity = new ExpandoObject();
-            entity.Session = jObj[DDPClient.DDP_PROPS_SESSION].ToString();
+            entity.Session = jObj[DDPClient.DdpPropsSession].ToString();
             entity.Type = DDPType.Connected;
 
             _subscriber.DataReceived(entity);
@@ -55,7 +55,7 @@ namespace Net.DDP.Client
             dynamic entity = new ExpandoObject();
             entity.Type = DDPType.MethodResult;
             entity.RequestingId = jObj["id"].ToString();
-            entity.Result = jObj[DDPClient.DDP_PROPS_RESULT].ToString();
+            entity.Result = jObj[DDPClient.DdpPropsResult].ToString();
             _subscriber.DataReceived(entity);
         }
 
@@ -63,25 +63,25 @@ namespace Net.DDP.Client
         {
             dynamic entity = new ExpandoObject();
 
-            switch (jObj[DDPClient.DDP_PROPS_MESSAGE].ToString())
+            switch (jObj[DDPClient.DdpPropsMessage].ToString())
             {
-                case DDPClient.DDP_MESSAGE_TYPE_ADDED:
+                case DDPClient.DdpMessageTypeAdded:
                     entity = GetMessageData(jObj);
 
                     entity.Type = DDPType.Added;
                     break;
-                case DDPClient.DDP_MESSAGE_TYPE_CHANGED:
+                case DDPClient.DdpMessageTypeChanged:
                     entity = GetMessageData(jObj);
                     entity.Type = DDPType.Changed;
                     break;
-                case DDPClient.DDP_MESSAGE_TYPE_NOSUB:
-                    HandleError(jObj[DDPClient.DDP_PROPS_ERROR]);
+                case DDPClient.DdpMessageTypeNosub:
+                    HandleError(jObj[DDPClient.DdpPropsError]);
                     break;
-                case DDPClient.DDP_MESSAGE_TYPE_READY:
-                    entity.RequestsIds = ((JArray) jObj[DDPClient.DDP_PROPS_SUBS]).Select(id => id.Value<int>()).ToArray();
+                case DDPClient.DdpMessageTypeReady:
+                    entity.RequestsIds = ((JArray) jObj[DDPClient.DdpPropsSubs]).Select(id => id.Value<int>()).ToArray();
                     entity.Type = DDPType.Ready;
                     break;
-                case DDPClient.DDP_MESSAGE_TYPE_REMOVED:
+                case DDPClient.DdpMessageTypeRemoved:
                     entity = GetMessageData(jObj);
                     entity.Type = DDPType.Removed;
                     break;
@@ -92,10 +92,10 @@ namespace Net.DDP.Client
 
         private dynamic GetMessageData(JObject json)
         {
-            var tmp = (JObject)json[DDPClient.DDP_PROPS_FIELDS];
+            var tmp = (JObject)json[DDPClient.DdpPropsFields];
             dynamic entity = GetMessageDataRecursive(tmp);
-            entity.Id = json[DDPClient.DDP_PROPS_ID].ToString();
-            entity.Collection = json[DDPClient.DDP_PROPS_COLLECTION].ToString();
+            entity.Id = json[DDPClient.DdpPropsId].ToString();
+            entity.Collection = json[DDPClient.DdpPropsCollection].ToString();
             
             return entity;
         }

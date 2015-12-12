@@ -194,7 +194,7 @@ namespace Net.DDP.Client.UnitTest
             var systemUnderTest = new DDPClient(connector: mockConnector.Object, queueProcessor: mockQueueProcessor.Object);
 
             /* ---- Act ---- */
-            systemUnderTest.Connect("example.com:1337", false);
+            systemUnderTest.ConnectWithoutSsl("example.com:1337");
             systemUnderTest.Dispose();
 
             /* ---- Assert ---- */

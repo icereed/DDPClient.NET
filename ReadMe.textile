@@ -33,7 +33,7 @@ It is very easy with the help of Stargazer. See the code below.
 		DDPClient client;
 
 		using (client = new DDPClient(sub)) {
-			client.Connect("localhost:3000");
+			client.ConnectWithoutSsl("localhost:3000");
 			client.Subscribe("allproducts");
 			Console.ReadLine(); // Wait for completion
 		} // End of using block causes the client to close the connection.
@@ -83,7 +83,7 @@ Let's see how to invoke a method in Meteor.
 		DDPClient client = new DDPClient(sub);
 
 		using (client = new DDPClient(sub)) {
-			client.Connect("localhost:3000");
+			client.ConnectWithoutSsl("localhost:3000");
 			client.Call("addProduct", "NS5", "IRobot");
 			Console.ReadLine(); // Wait for response
 		}
