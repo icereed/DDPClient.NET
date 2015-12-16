@@ -36,5 +36,7 @@ namespace Net.DDP.Client
         int GetCurrentRequestId();
 
         IDdpStateTracker StateTracker { get; }
+
+        void Close();
     }
 }

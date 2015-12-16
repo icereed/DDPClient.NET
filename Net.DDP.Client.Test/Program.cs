@@ -21,7 +21,10 @@ namespace Net.DDP.Client.Test
                 client.ConnectWithSsl("atmosphere.meteor.com:443");
                 client.Subscribe("packages");
                 Console.ReadLine();
+                client.Close();
+                Console.ReadLine();
             }
+            Console.WriteLine("--- DISPOSED ---");
             Console.ReadLine();
 
         }

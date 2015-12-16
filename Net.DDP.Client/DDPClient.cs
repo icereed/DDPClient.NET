@@ -32,6 +32,10 @@ namespace Net.DDP.Client
             _uniqueId = 1;
         }
 
+        public DDPClient() : this(new NullSubscriber())
+        {
+        }
+
         public DDPClient(IDataSubscriber subscriber) : this(new DdpConnector(), new DefaultQueueProcessor<string>(new JsonDeserializeHelper(subscriber).Deserialize))
         {
         }
@@ -100,6 +104,13 @@ namespace Net.DDP.Client
         }
 
         public IDdpStateTracker StateTracker => _connector;
+        public void Close()
+        {
+            if (_connector.State != ConnectionState.Closed)
+            {
+                _connector.Close();
+            }
+        }
 
         /// <summary>
         /// Closes the DDP connection (<see cref="IDdpConnector.Close"/>).
@@ -107,10 +118,7 @@ namespace Net.DDP.Client
         /// </summary>
         public void Dispose()
         {
-            if (_connector.State != ConnectionState.Closed)
-            {
-                _connector.Close();
-            }
+            Close();
             _queueHandler.Dispose();
         }
     }
