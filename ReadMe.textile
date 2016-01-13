@@ -6,14 +6,6 @@ There will be a lot of breaking changes in the near future until mid of November
 
 Stargazer is a library to connect to DDP server. DDP is the protocol used in Meteor. Using Stargazer you can subscribe to published items or call a Meteor method and display the same in your ASP.NET or Desktop applications.
 
-h2. New features
-
-
-* Tested API: A unit test code coverage over 90% is the goal.
-* State tracking: You are able to track the state of the connection and you may act on certain events.
-* More extensible architecture: It is tried to achieve an extensible architecture, so you can use components seperately or inject your own.
-* A full documented API: There will be a documentation.
-
 h2. NuGet package
 
 
